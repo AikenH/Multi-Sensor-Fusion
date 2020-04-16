@@ -9,10 +9,13 @@
 
 1. Centralized & Distributed Fusion based on linear states transfer equation. <br>
     线性状态转移方程下的集中式和分布式多传感信息融合
-    >include:  
-    >Kalman Fliter 卡尔曼滤波<br>
-    >information fusion 信息融合<br>
-    >
+    include:  
+    - Kalman Fliter 卡尔曼滤波<br>
+    - SCC-Simple Convex Combination 简单凸组合融合算法<br>
+    - GaussNoise 高斯噪声<br>
+    - Loss Ellipse 误差椭圆<br>
+    - information fusion 信息融合<br>
+
 2. 
 
 
