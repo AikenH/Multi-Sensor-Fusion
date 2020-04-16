@@ -2,7 +2,7 @@
 ## Intro:
 仅仅为多传感信息融合的课程作业<br>
 见仁见智，慎用代码 <br>
-<p align='right'>AIKEN-H<br></p> 
+
 
 
 ## Contents：
@@ -20,4 +20,6 @@
 
 ### <center>水平有限,请多多指教</center>
 <center>Ability is Limited；Appreciate Comments</center>
+
+<p align='right'>AIKEN-H<br></p> 
 <p align='right'>2020-04-14(origin)</p>
