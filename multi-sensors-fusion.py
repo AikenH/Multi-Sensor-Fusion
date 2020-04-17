@@ -183,6 +183,7 @@ def movement(Num,x00,x01):
     return list1
 
 if __name__ == "__main__":
+    print(__doc__)
     t_start = time.time()
     # 基本运动模型参数
     F = np.mat([[0,1],[-0.81,1.74]])
