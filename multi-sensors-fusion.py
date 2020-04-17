@@ -1,5 +1,5 @@
 '''FUNCTION DOC
-2020-04-03 Aiken Hong 洪振鑫
+2020-04-16 Aiken Hong 洪振鑫
 多传感信息融合作业3： 
 集中式，分布式估计融合系统
 ----------------------------------------------------
@@ -30,7 +30,7 @@ def LossEllipse(Mean, Cov, color='yellow', Cof=None):
     Parameter:Mean:均值，Cov:协方差矩阵， Cof：置信度'''
     # 计算协方差阵的特征值和特征向量
     vals,vecs = np.linalg.eigh(Cov)
-    print('vals:{},\n vecs:{}'.format(vals,vecs))
+    # print('vals:{},\n vecs:{}'.format(vals,vecs))
     # 计算最大特征值对应的特征向量来计算矩阵的椭圆的偏移角
     k = np.argmax(vals)
     vecs = np.array(vecs)
@@ -183,6 +183,7 @@ def movement(Num,x00,x01):
     return list1
 
 if __name__ == "__main__":
+    t_start = time.time()
     # 基本运动模型参数
     F = np.mat([[0,1],[-0.81,1.74]])
     P = np.mat([[1,0],[0,1]])
@@ -191,15 +192,20 @@ if __name__ == "__main__":
     R1 = 0.3
     R2 = 0.6
     # 执行参数
-    mode = 0  #控制集中式或者分布式
+    mode = 1  #控制集中式或者分布式
     num = 300  #控制跟踪多远
     # 入口函数
     if mode == 1 :
+        print('------------strat Distribute FUsion-----------------')
         DistributedFusion(num,True)
     else:
+        print('------------strat Central FUsion-----------------')
         CentralFusion(num,P,True)
     
     NoiseGenertor(0.5,100,shownoise=True)
+    run_time = time.time()-t_start
+
+    print("runtime:  {}".format(run_time))
     # print(movement(20,0,0))
     # NoiseGenertor(6,100,'NOise2',shownoise=True)
     # mean = [0,0]

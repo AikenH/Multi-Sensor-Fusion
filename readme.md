@@ -14,9 +14,13 @@
     - SCC-Simple Convex Combination 简单凸组合融合算法<br>
     - GaussNoise 高斯噪声<br>
     - Loss Ellipse 误差椭圆<br>
-    - information fusion 信息融合<br>
+    - Sequential fusion 集中式序贯融合<br>
 
-2. 
+2. Track Association<br>
+    航机关联，在不同杂波密度的情况下的误差分析和比较<br>
+    include：
+    - NN
+    - PDA
 
 
 ## Something else:
