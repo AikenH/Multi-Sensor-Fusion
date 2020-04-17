@@ -8,9 +8,9 @@ Define：
 产生随机运动序列 xn = 1.74x(n-1) - 0.81x(n-2) +v0(n)
 Sensor1的观测方程：y(n) = x(n) + v1(n)
 Sensor2的观测方程：y(n) = x(n) + v2(n)
-0均值白高斯：v0：方差0.04 V1：方差4.5 V2：方差 0.5
+0均值白高斯：v0：方差0.04 V1：方差4.5 V2：方差 9
 ----------------------------------------------------
-TODO：Write a report  
+TODO：误差分析与输出 & Write a report  
 实验内容，实验原理，实验场景，实验结果展示和分析
 '''
 
@@ -23,7 +23,7 @@ import time
 
 '''------------------Utility Function--------------------------'''
 
-# 协方差椭圆，可能需要叠加协方差椭圆，看着办吧,换成return ellipse，然后集成print
+
 def LossEllipse(Mean, Cov, color='yellow', Cof=None):
     '''误差椭圆绘制,一般根据sigma，2sigma，3sigma，和95%置信度，图片保存到当前文件夹
     
@@ -50,11 +50,13 @@ def LossEllipse(Mean, Cov, color='yellow', Cof=None):
     # plt.savefig('lossEllipse.jpg')
     plt.show()
 
-def PlotTrack(Num,x_real,Pred,Loss, title=None):
+def PlotTrack(Num,x_real,Pred,Loss,detect=None,title=None):
     '''绘制估计的轨迹和根据状态演化方程产生的轨迹'''
     n = np.linspace(1,Num+1,Num+1)
     plt.plot(n,Pred,color='red',label='pred')
     plt.plot(n,x_real,color='blue',label='read')
+    if detect is not None:
+        plt.plot(n,detect,color='bisque',label='detect')
     plt.title(title)
     plt.legend()
     plt.show()
@@ -64,7 +66,8 @@ def PlotTrack(Num,x_real,Pred,Loss, title=None):
 def NoiseGenertor(Gsigma,Num,title=None,Gmean=0,shownoise=False):
     '''高斯白噪声生成，可选图像显示，'''
     x = np.linspace(0,1,Num)
-    GaussNoise = norm.pdf(x,Gmean,Gsigma)
+    # GaussNoise = norm.pdf(x,Gmean,Gsigma)
+    GaussNoise = np.random.normal(Gmean,Gsigma,Num)
     if shownoise==True:
         plt.plot(x,GaussNoise)
         plt.title(title)
@@ -72,12 +75,6 @@ def NoiseGenertor(Gsigma,Num,title=None,Gmean=0,shownoise=False):
     return GaussNoise
 
 '''-------------Distributed Fusion Function--------------------'''
-'''
-TODO：分布式融合： 
-在每个sensor上使用（KF：PPT4-1：32），得到一个滤波估计，将滤波估计(Track跟踪轨迹)，
-（和方差啥？估计误差）的传送到Center
-Center做 Track 的融合: PPT4-2：107
-'''
 def DistributedFusion(Num=50,show=False):
     '''分布式融合入口函数'''
     x_real = movement(Num+1,0,0)
@@ -100,7 +97,7 @@ def DistributedFusion(Num=50,show=False):
     Pred = Pred.reshape(Num)
     if show:
         cov = Loss[i]
-        PlotTrack(Num-1,x_real[0:Num],Pred,cov,'final')
+        PlotTrack(Num-1,x_real[0:Num],Pred,cov,title='final')
 
 
 def KalmanFliter(Num,x_real,R,P,showfig=False):
@@ -112,11 +109,12 @@ def KalmanFliter(Num,x_real,R,P,showfig=False):
     SensorGet = x_real + Noise
     # 👆生成传感器读取数据
     Value = []
-    Value.append(np.mat([[x_real[0],],[x_real[0],]]))
+    Value.append(np.mat([[x_real[0],],[x_real[1],]]))
     Loss = []
     Loss.append(P)
     # 存储初值和后续滤波结果
     for i in tqdm(range(Num)):
+        # kalman 滤波过程
         x_predict = F*Value[i] 
         P_predict = F*P*F.T + Q0
         kalman = P_predict* H.T/(H*P_predict*H.T+R)
@@ -130,9 +128,9 @@ def KalmanFliter(Num,x_real,R,P,showfig=False):
     value = np.array(value)
     value = value.reshape([Num+1])
     
-    if showfig:
+    if showfig==True:
         cov=Loss[i]
-        PlotTrack(Num,x_real,value,cov,'Kalman Flither {}'.format(R))
+        PlotTrack(Num,x_real,value,cov,SensorGet,'Kalman Flither {}'.format(R))
 
     return value,Loss
 
@@ -142,10 +140,38 @@ TODO：集中式融合：
 将每个sensor的观测，观测矩阵，噪声，传递到Center，
 然后使用基于信息滤波器的方法做最终的滤波(Track跟踪) Slide4-2：96
 '''
-def CentralFusion(Num):
-    '''集中式融合入口函数'''
-    pass
-
+def CentralFusion(Num,P,showfig=False):
+    '''集中式融合入口函数：序贯滤波的形式'''
+    x_real = movement(Num+1,0,0)
+    Sensor1 = x_real + NoiseGenertor(R1,Num+1,title='sensor1 noise')
+    Sensor2 = x_real + NoiseGenertor(R2,Num+1,title='sensor2 noise')
+    '''--------------------------------------------------------------------'''
+    Value = []
+    Value.append(np.mat([[x_real[0]],[x_real[1]]]))
+    Loss = []
+    Loss.append(P)
+    for i in tqdm(range(num)):
+        # 融合中心
+        x_predict = F* Value[i]
+        P_Center = F*P*F.T+Q0
+        # 传感器1的更新
+        P_predict = (P_Center.I + H.T*H/R1).I 
+        K = P_predict * H.T / R1
+        temp = x_predict + K*(Sensor1[i+1]- H*x_predict)
+        # 传感器2的更新
+        P_predict = (P_Center.I + H.T*H/R2).I
+        K = P_predict * H.T / R2
+        x_predict = temp + K*(Sensor2[i+1]- H*temp)
+        # 更新P
+        P = P_predict
+        Value.append(x_predict) 
+        Loss.append(P)
+    value = [Value[i][1].tolist() for i in range(len(Value))]
+    value = np.array(value)
+    value = value.reshape([Num+1])
+    if showfig==True:
+        cov=Loss[i]
+        PlotTrack(Num,x_real,value,cov,detect=Sensor2,title='CentraFusion')
 
 '''-------------------Intro-----------------------'''
 def movement(Num,x00,x01):
@@ -167,17 +193,18 @@ if __name__ == "__main__":
     P = np.mat([[1,0],[0,1]])
     Q0 = np.mat([[0,0],[0,0.04]])
     H = np.mat([0,1])
-    R1 = 4.5
-    R2 = 0.5
+    R1 = 0.3
+    R2 = 0.6
     # 执行参数
-    mode = 1  #控制集中式或者分布式
-    num = 100  #控制跟踪多远
+    mode = 0  #控制集中式或者分布式
+    num = 300  #控制跟踪多远
     # 入口函数
     if mode == 1 :
         DistributedFusion(num,True)
     else:
-        CentralFusion(num)
+        CentralFusion(num,P,True)
     
+    NoiseGenertor(0.5,100,shownoise=True)
     # print(movement(20,0,0))
     # NoiseGenertor(6,100,'NOise2',shownoise=True)
     # mean = [0,0]
@@ -186,3 +213,21 @@ if __name__ == "__main__":
     # cov = np.mat([[0.62961845, 0.64065115],
     #     [0.64065115, 0.73873982]])
     # LossEllipse(mean,cov)
+
+
+
+
+
+        # # 第一步要整合多维度的数据,将数据重构 
+    # SensorTemp = np.zeros([num+1,4,1])
+    # for i in range(Num):
+    #     for j in range(4):
+    #         if j <2:
+    #             SensorTemp[i,j,0] = Sensor1[i+j]
+    #         else:
+    #             SensorTemp[i,j,0] = Sensor2[i+j-2]
+    # SensorTemp = np.array(SensorTemp)
+    # SensorTemp = np.mat(A)
+    # H = np.mat([[0,1],[0,1]])
+    # R = np.diag([R1,R2])
+    # # 接下来进入集中式的滤波阶段：
