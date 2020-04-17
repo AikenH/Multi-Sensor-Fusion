@@ -135,11 +135,6 @@ def KalmanFliter(Num,x_real,R,P,showfig=False):
     return value,Loss
 
 '''---------------Central Fusion Function----------------------'''
-''' 
-TODO：集中式融合：
-将每个sensor的观测，观测矩阵，噪声，传递到Center，
-然后使用基于信息滤波器的方法做最终的滤波(Track跟踪) Slide4-2：96
-'''
 def CentralFusion(Num,P,showfig=False):
     '''集中式融合入口函数：序贯滤波的形式'''
     x_real = movement(Num+1,0,0)
@@ -213,21 +208,3 @@ if __name__ == "__main__":
     # cov = np.mat([[0.62961845, 0.64065115],
     #     [0.64065115, 0.73873982]])
     # LossEllipse(mean,cov)
-
-
-
-
-
-        # # 第一步要整合多维度的数据,将数据重构 
-    # SensorTemp = np.zeros([num+1,4,1])
-    # for i in range(Num):
-    #     for j in range(4):
-    #         if j <2:
-    #             SensorTemp[i,j,0] = Sensor1[i+j]
-    #         else:
-    #             SensorTemp[i,j,0] = Sensor2[i+j-2]
-    # SensorTemp = np.array(SensorTemp)
-    # SensorTemp = np.mat(A)
-    # H = np.mat([[0,1],[0,1]])
-    # R = np.diag([R1,R2])
-    # # 接下来进入集中式的滤波阶段：
