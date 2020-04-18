@@ -22,8 +22,6 @@ from tqdm import tqdm
 import time 
 
 '''------------------Utility Function--------------------------'''
-
-
 def LossEllipse(Mean, Cov, color='yellow', Cof=None):
     '''误差椭圆绘制,一般根据sigma，2sigma，3sigma，和95%置信度，图片保存到当前文件夹
     

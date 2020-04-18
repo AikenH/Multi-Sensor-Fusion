@@ -1,8 +1,10 @@
 # Multi-Sensor Fusion
 ## Intro:
-仅仅为多传感信息融合的课程作业<br>
-见仁见智，慎用代码 <br>
 
+仅仅为多传感信息融合的课程作业<br>
+Coursework of multi-sensor information fusion<br>
+见仁见智，慎用代码 <br>
+Most likely not the code you need<br>
 
 
 ## Contents：
