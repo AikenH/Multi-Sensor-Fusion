@@ -9,7 +9,7 @@ Most likely not the code you need<br>
 
 ## Contents：
 
-1. Centralized & Distributed Fusion based on linear states transfer equation. <br>
+### 1. Centralized & Distributed Fusion based on linear states transfer equation. <br>
     线性状态转移方程下的集中式和分布式多传感信息融合
     include:  
     - Kalman Fliter 卡尔曼滤波<br>
@@ -26,9 +26,7 @@ Sensor1的观测方程：y(n) = x(n) + v1(n) <br>
 Sensor2的观测方程：y(n) = x(n) + v2(n) <br>
 0均值白高斯：v0：方差0.04 V1：方差4.5 V2：方差 9 <br>
 
----
-
-2. Track Association<br>
+### 2. Track Association<br>
     航机关联，在不同杂波密度的情况下的误差分析和比较<br>
     include：
     - NN(Basic on kalman )(直接将选点连线)
