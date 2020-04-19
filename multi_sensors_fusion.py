@@ -10,7 +10,7 @@ Sensor1的观测方程：y(n) = x(n) + v1(n)
 Sensor2的观测方程：y(n) = x(n) + v2(n)
 0均值白高斯：v0：方差0.04 V1：方差4.5 V2：方差 9
 ----------------------------------------------------
-TODO：误差分析与输出 & Write a report  
+RMSE表示误差把
 实验内容，实验原理，实验场景，实验结果展示和分析
 '''
 
@@ -72,19 +72,28 @@ def NoiseGenertor(Gsigma,Num,title=None,Gmean=0,shownoise=False):
         plt.show()
     return GaussNoise
 
+def RmseLoss(x_real,pred):
+    Loss,temp =0,0
+    M = len(pred)
+    for i in range(len(pred)):
+        temp += np.power((x_real[i+1]-pred[i]),2)
+    Loss = np.sqrt(temp/M)
+    print('Rmse Loss is : {}'.format(Loss))
+    pass
+
 '''-------------Distributed Fusion Function--------------------'''
 def DistributedFusion(Num=50,show=False):
     '''分布式融合入口函数'''
     x_real = movement(Num+1,0,0)
-    Sensor1, S1Loss = KalmanFliter(Num,x_real,R1,P,showfig=True)
-    Sensor2, S2Loss = KalmanFliter(Num,x_real,R2,P,showfig=True)
+    Sensor1, S1Loss = KalmanFliter(Num,x_real,R1,P,showfig=False)
+    Sensor2, S2Loss = KalmanFliter(Num,x_real,R2,P,showfig=False)
     Loss = []
     Pred = []
     for i in tqdm(range(Num)):
-        # part1 :P
+        # part1 :update P
         TempValue = np.linalg.inv(S1Loss[i]) + np.linalg.inv(S2Loss[i])
         Loss.append(np.linalg.inv(TempValue))
-        # part2: x
+        # part2: update x
         tempx1 = np.array([[Sensor1[i]],[Sensor1[i+1]]])
         tempx2 = np.array([[Sensor2[i]],[Sensor2[i+1]]])
         pp1 = np.dot(Loss[i],np.linalg.inv(S1Loss[i]))
@@ -93,6 +102,7 @@ def DistributedFusion(Num=50,show=False):
         Pred.append(Ans[1])
     Pred = np.array(Pred)
     Pred = Pred.reshape(Num)
+    RmseLoss(x_real,Pred)
     if show:
         cov = Loss[i]
         PlotTrack(Num-1,x_real[0:Num],Pred,cov,title='final')
@@ -162,6 +172,7 @@ def CentralFusion(Num,P,showfig=False):
     value = [Value[i][1].tolist() for i in range(len(Value))]
     value = np.array(value)
     value = value.reshape([Num+1])
+    RmseLoss(x_real,value)
     if showfig==True:
         cov=Loss[i]
         PlotTrack(Num,x_real,value,cov,detect=Sensor2,title='CentraFusion')
@@ -191,17 +202,17 @@ if __name__ == "__main__":
     R1 = 0.3
     R2 = 0.6
     # 执行参数
-    mode = 1  #控制集中式或者分布式
+    mode = 0  #控制集中式或者分布式
     num = 300  #控制跟踪多远
     # 入口函数
-    if mode == 1 :
+    if mode == 0 :
         print('------------strat Distribute FUsion-----------------')
         DistributedFusion(num,True)
     else:
         print('------------strat Central FUsion-----------------')
         CentralFusion(num,P,True)
     
-    NoiseGenertor(0.5,100,shownoise=True)
+    # NoiseGenertor(0.5,100,shownoise=True)
     run_time = time.time()-t_start
 
     print("runtime:  {}".format(run_time))

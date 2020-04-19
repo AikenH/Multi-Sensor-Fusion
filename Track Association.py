@@ -4,7 +4,7 @@
 量测航迹关联：NN PDA算法实现 ，改变杂波密度
 ----------------------------------------------------
 具体场景：
-Space Limited：100 * 100,   杂波数目均值:  3 
+Space Limited：x*y,   杂波数目均值:  lam 
 Groundtruth：
 二维平面运动 yk= y + 0.023t (var=0)；x =x +0.015t(var = 0) 无噪声
 F = [[1,0],[0,1]]  f = [[1,0],[0,1]] Q=[[0,0],[0,0]]
@@ -15,7 +15,7 @@ H = [[1,0],[0,1]]  v =独立高斯噪声 0.15 0.25 R=[[0.15,0],[0,0.25]]
 PDA：参数：Pg=Pd=1 通过这样的设定简化模型后进行运算
 预报还是基于KF方法，但是在更新和航迹关联的时候采用概率和全概公式进行
 --------------------------------------------------------------
-TODO:用RMSE(均方根误差，误差和的平均)来评价PDA的误差，Write a report
+
 '''
 
 import numpy as np 
@@ -101,6 +101,16 @@ def SensorGenerate(Move,N,R,shows=False):
     Sensor = [[tempx[i],tempy[i]] for i in range(N)]
     Sensor = np.mat(Sensor)
     return Sensor
+
+def RmseLoss(move,x,y):
+    '''计算rmse loss来量测PDA的效果'''
+    Loss,temp = 0, 0
+    M = len(x) 
+    for i in range(len(x)):
+        temp += np.power((move[i,0]-x[i]),2) + np.power((move[i,1]-y[i]),2)
+    Loss = np.sqrt(temp/M)
+    print('RMSE LOSS equal: {}'.format(Loss))
+    pass
 
 '''------------------NN Associate Function--------------------------'''
 def NNAssociate(N,R,P,show=False):
@@ -214,7 +224,8 @@ def PDAssociate(N,R,P,show=False):
     x = [Value[i][0,0] for i in range(len(Value))]
     y = [Value[i][1,0] for i in range(len(Value))]
     Plottrack(N,move,Clutterx,Cluttery,Sensor,x,y,True)
-    pass
+    RmseLoss(move,x,y)
+    return move,Clutterx,Cluttery,Sensor,x,y
 
 if __name__ == "__main__":
     t_s = time.time()
@@ -232,8 +243,8 @@ if __name__ == "__main__":
     Lam = 3
     maxx = 0.015 *Num
     maxy = 0.023 *Num
-    IsNN = True
-    # IsNN = False
+    # IsNN = True
+    IsNN = False
     # 均匀分布的协方差（两个坐标之间假设独立）
     R_uniformx = np.power(maxx,2)/12
     R_uniformy = np.power(maxy,2)/12
