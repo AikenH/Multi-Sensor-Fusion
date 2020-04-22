@@ -75,7 +75,7 @@ def NoiseGenertor(Gsigma,Num,title=None,Gmean=0,shownoise=False):
 def RmseLoss(x_real,pred):
     Loss,temp =0,0
     M = len(pred)
-    for i in range(len(pred)):
+    for i in range(len(pred)-1):
         temp += np.power((x_real[i+1]-pred[i]),2)
     Loss = np.sqrt(temp/M)
     print('Rmse Loss is : {}'.format(Loss))
@@ -85,8 +85,8 @@ def RmseLoss(x_real,pred):
 def DistributedFusion(Num=50,show=False):
     '''分布式融合入口函数'''
     x_real = movement(Num+1,0,0)
-    Sensor1, S1Loss = KalmanFliter(Num,x_real,R1,P,showfig=False)
-    Sensor2, S2Loss = KalmanFliter(Num,x_real,R2,P,showfig=False)
+    Sensor1, S1Loss = KalmanFliter(Num,x_real,R1,P,showfig=True)
+    Sensor2, S2Loss = KalmanFliter(Num,x_real,R2,P,showfig=True)
     Loss = []
     Pred = []
     for i in tqdm(range(Num)):
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     R1 = 0.3
     R2 = 0.6
     # 执行参数
-    mode = 0  #控制集中式或者分布式
+    mode = 1  #控制集中式或者分布式
     num = 300  #控制跟踪多远
     # 入口函数
     if mode == 0 :

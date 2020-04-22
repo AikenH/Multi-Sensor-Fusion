@@ -224,7 +224,7 @@ def PDAssociate(N,R,P,show=False):
     x = [Value[i][0,0] for i in range(len(Value))]
     y = [Value[i][1,0] for i in range(len(Value))]
     Plottrack(N,move,Clutterx,Cluttery,Sensor,x,y,True)
-    RmseLoss(move,x,y)
+    RmseLoss(Sensor,x,y)
     return move,Clutterx,Cluttery,Sensor,x,y
 
 if __name__ == "__main__":
@@ -240,7 +240,7 @@ if __name__ == "__main__":
     R = np.mat([[0.15,0],[0,0.25]])
     '''执行参数'''
     Num = 300
-    Lam = 3
+    Lam = 0.1
     maxx = 0.015 *Num
     maxy = 0.023 *Num
     # IsNN = True
